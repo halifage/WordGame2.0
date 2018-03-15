@@ -6,6 +6,7 @@ public class GamePlay {
     private static HashMap<String, Integer> letterValues;
     private static ArrayList<String> tiles;
     protected int wordScore;
+    protected ArrayList<String> wordPlayed = new ArrayList<>();
     private static ArrayList<String> dictionary;
     private static ArrayList<String> alphabet;
 
@@ -21,7 +22,7 @@ public class GamePlay {
         return letterBank();
     }
 
-    private void alphabet(){
+    private void alphabet() {
         for (char x = 65; x <= 90; x++) {
             alphabet.add(Character.toString(x).trim());
         }
@@ -121,7 +122,7 @@ public class GamePlay {
         }
     }
 
-    public static ArrayList<String> newHand(ArrayList<String> tilesLeft) {
+    protected static ArrayList<String> newHand(ArrayList<String> tilesLeft) {
         //give player an initial set of 7 random letters
         ArrayList<String> emptyHand = new ArrayList<>();
         Random r = new Random();
@@ -136,7 +137,7 @@ public class GamePlay {
         return emptyHand;
     }
 
-    public void updateHand(List<String> tiles, List<String> hand, List<String> word) {
+    protected void updateHand(List<String> tiles, List<String> hand, List<String> word) {
         Random r = new Random();
 
         if (!word.get(0).equals("")) {
@@ -155,13 +156,13 @@ public class GamePlay {
         }
     }
 
-    public ArrayList<String> dictionary(){
+    private ArrayList<String> dictionary() {
         //build a dictionary List of English words
         Scanner s;
-        File f = new File("dictionary.txt");							//file containing the words
+        File f = new File("dictionary.txt");                            //file containing the words
         try {
             s = new Scanner(f);
-            while(s.hasNextLine()) {							//read file and add each word to the list
+            while (s.hasNextLine()) {                            //read file and add each word to the list
                 dictionary.add(s.nextLine().trim().toUpperCase());
             }
         } catch (Exception e) {
@@ -171,40 +172,76 @@ public class GamePlay {
         return dictionary;
     }
 
-    public void printScores(List<Player> players){
+    private void printScores(List<Player> players) {
         List<Integer> totalScores = new ArrayList<>();
-        for(Player p : players) {
+        for (Player p : players) {
             totalScores.add(p.getScore());
         }
 
-        for(Player player: players) {
-            if(Collections.max(totalScores)==player.getScore()) {
-                System.out.println("THE WINNER IS ======> " + player.getName() +  " <======  WITH " +player.getScore() + " POINTS!!!!!");
+        for (Player player : players) {
+            if (Collections.max(totalScores) == player.getScore()) {
+                System.out.println("THE WINNER IS ======> " + player.getName() + " <======  WITH " + player.getScore() + " POINTS!!!!!");
                 System.out.println();
-            }else {
-                System.out.println("====> " +player.getName() + " <==== " + " SCORED " + player.getScore() + " POINTS.");
+            } else {
+                System.out.println("====> " + player.getName() + " <==== " + " SCORED " + player.getScore() + " POINTS.");
                 System.out.println();
             }
         }
     }
 
-    public void wordScore(HashMap<String, Integer> letterValues, ArrayList<String> word) { 	// calculates the points for word played, returns it and updates player's score
+    protected void wordScore(HashMap<String, Integer> letterValues, ArrayList<String> word) {    // calculates the points for word played, returns it and updates player's score
         //calculate the point value of word played and update total score
 
-        if(!word.get(0).equals("")){
-            for(String letter : word) {
+        if (!word.get(0).equals("")) {
+            for (String letter : word) {
                 int tileValue = letterValues.get(letter);
                 wordScore += tileValue;
             }
         }
 
-        if(word.size() == 7) {													//bonus of 50 points if word uses all 7 letters in hand!
+        if (word.size() == 7) {                                                    //bonus of 50 points if word uses all 7 letters in hand!
             wordScore += 50;
         }
-        System.out.println("YOUR WORD SCORED: ------------ " + wordScore);			//print word value
+        System.out.println("YOUR WORD SCORED: ------------ " + wordScore);            //print word value
         System.out.println();
     }
 
+    private void playWord(ArrayList<String> hand) {
+        ArrayList<String> handAfterWord = new ArrayList<>();
+        Scanner s = new Scanner(System.in);
+        String userInput = "";
+        wordPlayed.clear();
 
+        try {
+            userInput = s.next().trim().toUpperCase();
+            for (String str : userInput.split("")) {
+                if(alphabet.contains(str)|| str.equals("#")){
+                    wordPlayed.add(str);
+                }else{
+                    System.out.println(str + " IS NOT A VALID LETTER!");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }finally {
+            s.close();
+        }
+        for (String letter : wordPlayed){
+            handAfterWord.remove(letter);
+        }
+        if(hand.size() - handAfterWord.size()== wordPlayed.size()){
+            if(wordPlayed.contains("#")){
+                //convert blank
+            }
+        }else{
+            for(String str : hand){
+                wordPlayed.remove(str);
+            }
+            System.out.println(wordPlayed + " NOT IN HAND!");
+        }
+
+    }
 
 }
+
+
