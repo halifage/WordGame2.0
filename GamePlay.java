@@ -24,7 +24,7 @@ public class GamePlay {
 
     private void alphabet() {
         for (char x = 65; x <= 90; x++) {
-            alphabet.add(Character.toString(x).trim());
+            alphabet.add(Character.toString(x).trim().toUpperCase());
         }
     }
 
@@ -210,36 +210,83 @@ public class GamePlay {
         ArrayList<String> handAfterWord = new ArrayList<>();
         Scanner s = new Scanner(System.in);
         String userInput = "";
-        wordPlayed.clear();
 
-        try {
-            userInput = s.next().trim().toUpperCase();
-            for (String str : userInput.split("")) {
-                if(alphabet.contains(str)|| str.equals("#")){
-                    wordPlayed.add(str);
-                }else{
-                    System.out.println(str + " IS NOT A VALID LETTER!");
+        while(true) {
+            try {
+                wordPlayed.clear();
+                userInput = s.next().trim().toUpperCase();
+                for (String str : userInput.split("")) {
+                    if (alphabet.contains(str) || str.equals("#")) {
+                        wordPlayed.add(str);
+                    } else {
+                        System.out.println(str + " IS NOT A VALID LETTER!");
+                    }
                 }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            } finally {
+                s.close();
             }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }finally {
-            s.close();
-        }
-        for (String letter : wordPlayed){
-            handAfterWord.remove(letter);
-        }
-        if(hand.size() - handAfterWord.size()== wordPlayed.size()){
-            if(wordPlayed.contains("#")){
-                //convert blank
+            for (String letter : wordPlayed) {
+                handAfterWord.remove(letter);
             }
-        }else{
-            for(String str : hand){
-                wordPlayed.remove(str);
+            if (hand.size() - handAfterWord.size() == wordPlayed.size()) {
+                if (wordPlayed.contains("#")) {
+                    wordPlayed.clear();
+                    userInput = convertBlank(userInput);
+                }
+                if (dictionary.contains(userInput)){
+                    System.out.println("WORD PLAYED ==========> " + userInput);
+                    wordScore(letterValues,wordPlayed);
+                    updateHand(tiles,hand,wordPlayed);
+                    break;
+                }
+            } else {
+                for (String str : hand) {
+                    wordPlayed.remove(str);
+                }
+                System.out.println(wordPlayed + " NOT IN HAND!");
+                continue;
             }
-            System.out.println(wordPlayed + " NOT IN HAND!");
         }
+    }
 
+    private String convertBlank(String word) {
+        int x = 0;
+        int i = 1;
+        String userWord = "";
+        while (x < 1) {
+            try {
+                for (String letter : word.split("")) {
+                    if (letter.equals("#")) {
+                        Scanner scan = new Scanner(System.in);
+                        System.out.println();
+                        System.out.println("WHICH LETTER DOES 'Blank " + i++ + "' REPRESENT? ");
+                        System.out.println();
+                        String replaceBlank = scan.next().trim().toUpperCase();
+                        if (alphabet.contains(replaceBlank)) {
+                            userWord+=replaceBlank;
+
+                        } else {
+                            System.out.println("PLEASE CHOOSE A VALID LETTER (A to Z)");
+                            System.out.println();
+                            continue;
+                        }
+                    }else{
+                        userWord+=letter;
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("INVALID INPUT!");
+                System.out.println();
+                continue;
+            }
+            x++;
+        }
+        for(String letter:userWord.split("")){
+            wordPlayed.add(letter);
+        }
+        return userWord;
     }
 
 }
