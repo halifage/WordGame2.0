@@ -4,7 +4,7 @@ public class Player extends GamePlay {
 
     private int score;
 
-    private ArrayList<String> hand;
+    private ArrayList<String> hand = new ArrayList<>();
 
     private String name;
 
@@ -15,8 +15,8 @@ public class Player extends GamePlay {
         score += points;
     }
 
-    public void setHand() {
-        hand = newHand(getLetterBank());
+    public void setHand(ArrayList<String> letters) {
+        hand = letters;
     }
 
     public void setName(String userName) {
@@ -44,12 +44,13 @@ public class Player extends GamePlay {
     }
 
     public Player(int num) {
-        Scanner s = new Scanner(System.in);
-        System.out.println();
-        System.out.println("Player " + num + " PLEASE ENTER YOUR NAME:  ");
-        System.out.println();
-        name = s.nextLine().trim().toUpperCase();
-        setHand();
+
+            System.out.println();
+            System.out.println("Player " + num + " PLEASE ENTER YOUR NAME:  ");
+            System.out.println();
+            name = getUserInput();
+            hand = newHand();
+
     }
 
 }

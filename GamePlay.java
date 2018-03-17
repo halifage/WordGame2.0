@@ -2,33 +2,38 @@ import java.io.File;
 import java.util.*;
 
 public class GamePlay {
+    private ArrayList<String> alphabet = alphabet(new ArrayList<>());
+    private HashMap<String, Integer> letterValues = letterValues(new HashMap<String, Integer>());
+    private ArrayList<String> tiles = letterBank(new ArrayList<>());
+    private int wordScore;
+    private ArrayList<String> wordPlayed = new ArrayList<>();
+    private static ArrayList<String> dictionary = dictionary(new ArrayList<>());
+    private static Random random = new Random();
+    private static String userInput;
+    ArrayList<Player> players = new ArrayList<>();
+    private static int counter;
+    ArrayList<String> lettersToSwap = new ArrayList<>();
 
-    private static HashMap<String, Integer> letterValues;
-    private static ArrayList<String> tiles;
-    protected int wordScore;
-    protected ArrayList<String> wordPlayed = new ArrayList<>();
-    private static ArrayList<String> dictionary;
-    private static ArrayList<String> alphabet;
+//    public HashMap<String, Integer> getLetterValues() {
+//        return letterValues;
+//    }
 
-    public HashMap<String, Integer> getLetterValues() {
-        return letterValues;
-    }
+//    public static ArrayList<String> getTiles() {
+//        return tiles;
+//    }
 
-    public static ArrayList<String> getTiles() {
-        return tiles;
-    }
+//    public ArrayList<String> getLetterBank() {
+//        return letterBank();
+//    }
 
-    public ArrayList<String> getLetterBank() {
-        return letterBank();
-    }
-
-    private void alphabet() {
+    private ArrayList<String> alphabet(ArrayList<String> alphabet) {
         for (char x = 65; x <= 90; x++) {
             alphabet.add(Character.toString(x).trim().toUpperCase());
         }
+        return alphabet;
     }
 
-    private ArrayList<String> letterBank() {
+    private ArrayList<String> letterBank(ArrayList<String> tiles) {
         // create a letter bank with letters and their corresponding number of tiles
 
         HashMap<String, Integer> letters = new HashMap<>();
@@ -49,8 +54,6 @@ public class GamePlay {
                 letters.put(letter, 8);
             } else if (Arrays.asList("E").contains(letter)) {
                 letters.put(letter, 12);
-            } else if (Arrays.asList("#").contains(letter)) {
-                letters.put(letter, 2);
             } else {
                 letters.put(letter, 2);
             }
@@ -63,13 +66,9 @@ public class GamePlay {
         return tiles;
     }
 
-    private static void letterValues() {
+    private HashMap<String, Integer> letterValues(HashMap<String, Integer> letterValues) {
         // create a letter bank with letters and their corresponding values
-        ArrayList<String> alphabet = new ArrayList<>();
 
-        for (char x = 65; x <= 90; x++) {
-            alphabet.add(Character.toString(x));
-        }
         alphabet.add("#");
         alphabet.add("#");
 
@@ -86,77 +85,79 @@ public class GamePlay {
                 letterValues.put(letter, 8);
             } else if (Arrays.asList("Q", "Z").contains(letter)) {
                 letterValues.put(letter, 10);
-            } else if (Arrays.asList("#").contains(letter)) {
+            } else if ("#".equals(letter)) {
                 letterValues.put(letter, 0);
             } else {
                 letterValues.put(letter, 1);
             }
         }
+        return letterValues;
     }
 
-    protected List<Player> playersList(List<Player> players) {
+    protected String getUserInput() {
+        Scanner scan = new Scanner(System.in);
+        userInput = scan.next().trim().toUpperCase();
+        return userInput;
+    }
 
+    protected void playersList() {
         while (true) {
             try {
-                Scanner s = new Scanner(System.in);
                 System.out.println("HOW MANY PLAYERS? 1, 2, 3, or 4?");
                 System.out.println();
-                int input = s.nextInt();
-                if (input > 4) {
+                int i = Integer.parseInt(getUserInput());
+                if (i > 4) {
                     System.out.println("ONLY A MAXIMUM OF 4 PLAYERS IS ALLOWED!");
                     System.out.println();
-                    continue;
                 } else {
-                    for (int x = 1; x <= input; x++) {
+                    for (int x = 1; x <= i; x++) {
                         players.add(new Player(x));
                     }
+                    break;
                 }
-                return players;
             } catch (Exception e) {
-                System.out.println();
                 System.out.println("INVALID ENTRY!");
-                System.out.println();
-                System.out.println("PLEASE SELECT 1, 2, 3 or 4 ");
-                System.out.println();
+                continue;
             }
         }
     }
 
-    protected static ArrayList<String> newHand(ArrayList<String> tilesLeft) {
+    protected ArrayList<String> newHand() {
         //give player an initial set of 7 random letters
-        ArrayList<String> emptyHand = new ArrayList<>();
-        Random r = new Random();
+        ArrayList<String> newHand = new ArrayList<>();
         int x = 0;
 
         while (x < 7) {
-            String randomLetter = tilesLeft.get(r.nextInt(tilesLeft.size())).trim().toUpperCase();
-            emptyHand.add(randomLetter);
-            tilesLeft.remove(randomLetter);
+            String randomLetter = tiles.get(random.nextInt(tiles.size())).trim().toUpperCase();
+            newHand.add(randomLetter);
+            tiles.remove(randomLetter);
             x++;
         }
-        return emptyHand;
+        return newHand;
     }
 
-    protected void updateHand(List<String> tiles, List<String> hand, List<String> word) {
-        Random r = new Random();
-
-        if (!word.get(0).equals("")) {
-            if (tiles.size() >= word.size()) {
-                for (String letter : word) {
-                    String newLetter = tiles.get(r.nextInt(tiles.size()));
-                    hand.add(newLetter);
-                    tiles.remove(newLetter);
-                }
-            } else {
-                for (String letter : tiles) {
-                    hand.add(letter);
-                }
-                tiles.clear();
-            }
+    protected ArrayList<String> updateHand(List<String> tiles, ArrayList<String> hand, List<String> word) {
+        for (String letter : word) {
+            hand.remove(letter);
         }
+        if (tiles.size() >= word.size()) {
+            for (String letter : word) {
+                String newLetter = tiles.get(random.nextInt(tiles.size()));
+                hand.add(newLetter);
+                tiles.remove(newLetter);
+            }
+        } else {
+            for (String letter : tiles) {
+                hand.add(letter);
+            }
+            tiles.clear();
+        }
+        System.out.println("YOUR LETTERS ARE >>>>> " + hand + " <<<<<");
+        System.out.println();
+        return hand;
     }
 
-    private ArrayList<String> dictionary() {
+    private static ArrayList<String> dictionary(ArrayList<String> dictionary) {
         //build a dictionary List of English words
         Scanner s;
         File f = new File("dictionary.txt");                            //file containing the words
@@ -167,6 +168,8 @@ public class GamePlay {
             }
         } catch (Exception e) {
             System.out.println("FILE NOT FOUND!");
+            System.out.println(e.getMessage());
+            e.printStackTrace();
             System.out.println();
         }
         return dictionary;
@@ -180,10 +183,10 @@ public class GamePlay {
 
         for (Player player : players) {
             if (Collections.max(totalScores) == player.getScore()) {
-                System.out.println("THE WINNER IS ======> " + player.getName() + " <======  WITH " + player.getScore() + " POINTS!!!!!");
+                System.out.println("THE WINNER IS >>>>> " + player.getName() + " <<<<<  WITH " + player.getScore() + " POINTS!!!!!");
                 System.out.println();
             } else {
-                System.out.println("====> " + player.getName() + " <==== " + " SCORED " + player.getScore() + " POINTS.");
+                System.out.println(">>>>> " + player.getName() + " <<<<< " + " SCORED " + player.getScore() + " POINTS.");
                 System.out.println();
             }
         }
@@ -207,14 +210,17 @@ public class GamePlay {
     }
 
     private void playWord(ArrayList<String> hand) {
-        ArrayList<String> handAfterWord = new ArrayList<>();
-        Scanner s = new Scanner(System.in);
-        String userInput = "";
-
-        while(true) {
+        ArrayList<String> handAfterWord;
+        
+        while (true) {
+            handAfterWord = (ArrayList<String>) hand.clone();
             try {
                 wordPlayed.clear();
-                userInput = s.next().trim().toUpperCase();
+                System.out.println("PLAY A WORD... (or Press 'X' to pass your turn)");
+                getUserInput();
+                if (userInput.equals("X")) {
+                    break;
+                }
                 for (String str : userInput.split("")) {
                     if (alphabet.contains(str) || str.equals("#")) {
                         wordPlayed.add(str);
@@ -224,23 +230,24 @@ public class GamePlay {
                 }
             } catch (Exception e) {
                 System.out.println(e.getMessage());
-            } finally {
-                s.close();
             }
+
             for (String letter : wordPlayed) {
                 handAfterWord.remove(letter);
             }
+
             if (hand.size() - handAfterWord.size() == wordPlayed.size()) {
                 if (wordPlayed.contains("#")) {
                     wordPlayed.clear();
                     userInput = convertBlank(userInput);
                 }
-                if (dictionary.contains(userInput)){
+                if (dictionary.contains(userInput)) {
                     System.out.println("WORD PLAYED ==========> " + userInput);
-                    wordScore(letterValues,wordPlayed);
-                    updateHand(tiles,hand,wordPlayed);
+                    wordScore(letterValues, wordPlayed);
+                    hand = handAfterWord;
                     break;
                 }
+                System.out.println("Sorry '" + userInput + "' is NOT in the Dictionary!");
             } else {
                 for (String str : hand) {
                     wordPlayed.remove(str);
@@ -259,21 +266,20 @@ public class GamePlay {
             try {
                 for (String letter : word.split("")) {
                     if (letter.equals("#")) {
-                        Scanner scan = new Scanner(System.in);
                         System.out.println();
                         System.out.println("WHICH LETTER DOES 'Blank " + i++ + "' REPRESENT? ");
                         System.out.println();
-                        String replaceBlank = scan.next().trim().toUpperCase();
+                        String replaceBlank = getUserInput();
                         if (alphabet.contains(replaceBlank)) {
-                            userWord+=replaceBlank;
+                            userWord += replaceBlank;
 
                         } else {
                             System.out.println("PLEASE CHOOSE A VALID LETTER (A to Z)");
                             System.out.println();
                             continue;
                         }
-                    }else{
-                        userWord+=letter;
+                    } else {
+                        userWord += letter;
                     }
                 }
             } catch (Exception e) {
@@ -283,12 +289,108 @@ public class GamePlay {
             }
             x++;
         }
-        for(String letter:userWord.split("")){
+        for (String letter : userWord.split("")) {
             wordPlayed.add(letter);
         }
         return userWord;
     }
 
+    protected void swapLetters(List<String> hand) {
+        WHILE:
+        while (true) {
+            lettersToSwap.clear();
+            try {
+                System.out.println("ENTER LETTERS TO SWAP (or enter 'X' to pass your turn)");
+                getUserInput();
+                if (userInput.equals("X")) {
+                    break;
+                }
+                for (String str : userInput.split("")) {
+                    if (hand.contains(str)) {
+                        lettersToSwap.add(str);
+                    } else {
+                        System.out.println(str + " NOT IN HAND!");
+                        System.out.println("PLEASE SELECT A VALID LETTER");
+                        continue WHILE;
+                    }
+                }
+                break;
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+
+        }
+    }
+
+    protected String choice() {
+        String choice;
+        while (true) {
+            if (tiles.size() >= 7) {
+                System.out.println("PLEASE SELECT 'P' (play), 'S' (swap), 'X' (pass)");
+                choice = getUserInput();
+                if ((choice.equals("P")) || (choice.equals("S")) || (choice.equals("X"))) {
+                    return choice;
+                } else {
+                    System.out.println("INVALID SELECTION!");
+                    System.out.println();
+                    continue;
+                }
+            } else {
+                System.out.println("PLEASE SELECT 'P' (play) or 'X' (pass)");
+                choice = getUserInput();
+                if ((choice == "P") || (choice == "X")) {
+                    return choice;
+                } else {
+                    System.out.println("INVALID SELECTION!");
+                    System.out.println();
+                    continue;
+                }
+            }
+        }
+    }
+
+    public void play() {
+        playersList();
+        OUTER_WHILE:
+        while (counter < players.size()) {
+            FOR:
+            for (Player player : players) {
+                INNER_WHILE:
+                while (!player.isEndGame() && player.getHand().size() > 0) {
+                    System.out.println();
+                    System.out.println();
+                    System.out.println(">>>>> " + player.getName() + " <<<<<  PLAYING.....");
+                    System.out.println();
+                    System.out.println(player.getName()+"'S LETTERS ARE >>>>> " + player.getHand() + " <<<<<");
+                    System.out.println();
+                    switch (choice()) {
+                        case "P":
+                            System.out.println(player.getName()+"'S LETTERS ARE >>>>> " + player.getHand() + " <<<<<");
+                            playWord(player.getHand());
+                            player.setHand(updateHand(tiles, player.getHand(), wordPlayed));
+                            player.setScore(wordScore);
+                            System.out.println(player.getName()+ "'S SCORE IS >>>> " + player.getScore());
+                            break;
+                        case "S":
+                            System.out.println(player.getName()+"'S LETTERS ARE >>>>> " + player.getHand() + " <<<<<");
+                            swapLetters(player.getHand());
+                            player.setHand(updateHand(tiles, player.getHand(), lettersToSwap));
+                            player.setScore(wordScore);
+                            System.out.println(player.getName()+ "'S SCORE IS >>>> " + player.getScore());
+                            break;
+                        case "X":
+                            System.out.println(player.getName() + " HAS LEFT THE GAME.");
+                            System.out.println(player.getName()+ "'S SCORE IS >>>> " + player.getScore());
+                            player.setEndGame(true);
+                            counter++;
+                            continue OUTER_WHILE;
+                    }
+                    continue FOR;
+                }
+            }
+        }
+        printScores(players);
+    }
 }
 
 
